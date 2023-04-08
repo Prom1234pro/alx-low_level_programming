@@ -69,14 +69,13 @@ int main(int argc, char **argv)
 {
 	const char *file_from = argv[1];
 	const char *file_to = argv[2];
-	int fd_from = open(file_from, O_RDONLY);
+	ssize_t read_bytes, write_bytes;
 	char buf[BUFSIZE];
-	ssize_t nread, nwritten;
+	int fd_from = open(file_from, O_RDONLY);
 	int fd_to = open(file_to, O_WRONLY | O_CREAT | O_TRUNC, 0664);
 
 	if (argc != 3)
 		print_usage_and_exit(argv[0]);
-
 
 	if (fd_from == -1)
 		print_read_error_and_exit(file_from);
@@ -84,16 +83,19 @@ int main(int argc, char **argv)
 	if (fd_to == -1)
 		print_write_error_and_exit(file_to);
 
-	while ((nread = read(fd_from, buf, BUFSIZE)) > 0)
+	while ((read_bytes = read(fd_from, buf, BUFSIZE)) > 0)
 	{
-		nwritten = write(fd_to, buf, nread);
-		if (nwritten == -1)
-			print_write_error_and_exit(file_to);
-		if (nwritten != nread)
-			print_write_error_and_exit(file_to);
+		write_bytes = write(fd_to, buf, read_bytes);
+		if (write_bytes == -1 || write_bytes != read_bytes)
+		{
+			dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file_to);
+			close(fd_from);
+			close(fd_to);
+			exit(99);
+		}
 	}
 
-	if (nread == -1)
+	if (read_bytes == -1)
 		print_read_error_and_exit(file_from);
 
 	if (close(fd_from) == -1)
