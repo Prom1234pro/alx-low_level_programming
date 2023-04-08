@@ -67,24 +67,22 @@ void print_close_error_and_exit(int fd)
 
 int main(int argc, char **argv)
 {
+	const char *file_from = argv[1];
+	const char *file_to = argv[2];
+	int fd_from = open(file_from, O_RDONLY);
+	char buf[BUFSIZE];
+	ssize_t nread, nwritten;
+	int fd_to = open(file_to, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+
 	if (argc != 3)
 		print_usage_and_exit(argv[0]);
 
-	const char *file_from = argv[1];
-	const char *file_to = argv[2];
-
-	int fd_from = open(file_from, O_RDONLY);
 
 	if (fd_from == -1)
 		print_read_error_and_exit(file_from);
 
-	int fd_to = open(file_to, O_WRONLY | O_CREAT | O_TRUNC, 0664);
-
 	if (fd_to == -1)
 		print_write_error_and_exit(file_to);
-
-	char buf[BUFSIZE];
-	ssize_t nread, nwritten;
 
 	while ((nread = read(fd_from, buf, BUFSIZE)) > 0)
 	{
