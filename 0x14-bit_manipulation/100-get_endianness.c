@@ -1,19 +1,18 @@
 #include "main.h"
 
 /**
- * get_endianness - converts a number to binary
+ * get_endianness - checks the endianness of the system
  *
- * Return:int
+ * Return: 0 if big endian, 1 if little endian
  */
-
 
 int get_endianness(void)
 {
-	union
-	{
-		unsigned int i;
-		char c[4];
-	} endian_test = {0x01020304};
+	unsigned int i = 1;
+	char *c = (char *)&i;
 
-	return (endian_test.c[0] == 0x04 ? 1 : 0);
+	if (*c)
+		return (1);
+	else
+		return (0);
 }
